@@ -1,5 +1,8 @@
 # Using Different Calling Conventions Inside The Same Rust Project
 
+***THIS PROJECT ONLY BUILDS ON UNIX SYSTEMS WITH GCC FOR NOW BECAUSE IT
+USES GNU ASSEMBLER (GAS)***
+
 A calling convention specifies for example how parameters gets passed 
 between functions on a specific architecture and a specific
 runtime system (e.g. firmware or operating system). This is necessary on the one 
@@ -33,7 +36,66 @@ accumulator register and then add the other value to it.
 What's cool about Rust is that it is relatively easy for us to specify
 the calling convention that should be used. For this, please look
 into the code and execute it with `cargo run`. The code shows
-all relevant parts with comments.~~~~
+all relevant parts with comments. However, the most essential part is:
 
-***THIS PROJECT ONLY BUILDS ON UNIX SYSTEMS WITH GCC FOR NOW BECAUSE IT 
-   USES GNU ASSEMBLER (GAS)***
+```rust
+// PE => microsoft calling convention
+//   https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-160
+extern "win64" {
+    fn win64_abi__asm_add(a: i64, b: i64) -> i64;
+}
+
+// PE => Microsoft/Windows calling convention. In UEFI spec. Same as "win64".
+//   https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-160
+extern "efiapi" {
+    fn efi_abi__asm_add(a: i64, b: i64) -> i64;
+}
+
+// Defaults to System V ABI (64 bit), i.e. the calling convention used on
+// Linux or MacOS.
+extern "sysv64" {
+    fn system_v_abi__asm_add(a: i64, b: i64) -> i64;
+}
+```
+
+This tells Rust what calling convention should be used. Possible values
+can be found in the Rust compiler source: https://github.com/rust-lang/rust/blob/b09dad3eddfc46c55e45f6c1a00bab09401684b4/compiler/rustc_target/src/spec/abi.rs
+
+If we look into the Rust compiler output, therefore:
+```
+$ cargo build
+$ objdump -d target/debug/example-different-calling-conventions | less
+```
+
+we find for the first function call,
+
+```
+    7829:       b9 02 00 00 00          mov    $0x2,%ecx
+    782e:       ba 07 00 00 00          mov    $0x7,%edx
+    7833:       ff 15 97 c1 03 00       callq  *0x3c197(%rip)        # 439d0 <_GLOBAL_OFFSET_TABLE_+0x40>
+```
+
+for the second, and
+
+
+```
+    78c0:       b9 02 00 00 00          mov    $0x2,%ecx
+    78c5:       ba 07 00 00 00          mov    $0x7,%edx
+    78ca:       ff 15 f0 c0 03 00       callq  *0x3c0f0(%rip)        # 439c0 <_GLOBAL_OFFSET_TABLE_+0x30>
+```
+
+for the last
+
+```
+    795d:       bf 02 00 00 00          mov    $0x2,%edi
+    7962:       be 07 00 00 00          mov    $0x7,%esi
+    7967:       ff 15 5b c0 03 00       callq  *0x3c05b(%rip)        # 439c8 <_GLOBAL_OFFSET_TABLE_+0x38>
+```
+
+We can clearly see what registers are used for the argument passing.
+
+
+## More Resources
+- https://www.agner.org/optimize/calling_conventions.pdf
+- https://www.uclibc.org/docs/psABI-x86_64.pdf
+- https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-160

@@ -13,14 +13,13 @@ global_asm!(include_str!("gnu_asm.S"));
 // for possible values here
 
 
-// defaults to the default C calling convention of the compiler target
-// PE => microsoft calling convention
+// Behind the scenes, Windows uses "Microsoft/PE" calling convention.
 //   https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-160
 extern "win64" {
     fn win64_abi__asm_add(a: i64, b: i64) -> i64;
 }
 
-// PE => Microsoft/Windows calling convention. In UEFI spec. Same as "win64".
+// Behind the scenes, UEFI uses "Microsoft/PE" calling convention.
 //   https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-160
 extern "efiapi" {
     fn efi_abi__asm_add(a: i64, b: i64) -> i64;
@@ -28,6 +27,7 @@ extern "efiapi" {
 
 // Defaults to System V ABI (64 bit), i.e. the calling convention used on
 // Linux or MacOS.
+//   https://www.uclibc.org/docs/psABI-x86_64.pdf
 extern "sysv64" {
     fn system_v_abi__asm_add(a: i64, b: i64) -> i64;
 }
