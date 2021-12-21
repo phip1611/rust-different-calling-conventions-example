@@ -63,7 +63,7 @@ extern "efiapi" {
 }
 
 // Defaults to System V ABI (64 bit), i.e. the calling convention used on
-// Linux or MacOS.
+// Linux or MacOS (x86_64).
 extern "sysv64" {
     fn system_v_abi__asm_add(a: i64, b: i64) -> i64;
 }
