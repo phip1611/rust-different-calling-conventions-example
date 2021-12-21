@@ -1,8 +1,9 @@
-# The ability of Rust to include global assembly is poorly documented.
-# It uses GAS (GNU Assembly) syntax
+# Currently, all supported targets follow the assembly code syntax used by LLVM’s internal assembler which usually
+# corresponds to that of the GNU assembler (GAS). On x86, the ". intel_syntax noprefix" mode of GAS is used by default.
+# |
+# |-> From offical documentation. Available when https://github.com/rust-lang/reference/pull/1105 gets merged.
 
-# default
-# . intel_syntax noprefix
+# This files defines three "add(a,b)"-functions with three different calling conventions.
 
 .section .text
 
@@ -38,7 +39,7 @@
         ret
 
     # Adds two 64-bit numbers and returns the 64-bit result by using the
-    # "System V ABI" calling convention present in Linux and MacOS.
+    # "System V ABI" calling convention present in Linux and MacOS (x86_64).
     #
     # More info: https://www.uclibc.org/docs/psABI-x86_64.pdf
     #

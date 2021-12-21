@@ -2,6 +2,6 @@
 # https://rust-lang.github.io/rustup/overrides.html
 
 [toolchain]
-# equals to Rust nightly 1.55
-channel = "nightly-2021-06-23"
-components = [ "rustc", "cargo" ]
+# equals to Rust nightly 1.59
+channel = "nightly-2021-12-21"
+profile = "minimal"

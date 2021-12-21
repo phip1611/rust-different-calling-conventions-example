@@ -1,13 +1,12 @@
 #![feature(abi_efiapi)]
-#![feature(global_asm)]
 
 #[cfg(not(target_arch = "x86_64"))]
 compile_error!("This crate only builds on x86_64 machines");
 
-// global_asm can understand the "defautl assembly syntax of the given platform".
-// For example GAS (GNU Assembler) on Linux/MacOS.
-#[cfg(any(target_os = "linux", target_os = "macos"))]
-global_asm!(include_str!("gnu_asm.S"));
+use core::arch::global_asm;
+
+// Cargo rebuilds this automatically, if the file changes.
+global_asm!(include_str!("global_asm.S"));
 
 // see https://github.com/rust-lang/rust/blob/b09dad3eddfc46c55e45f6c1a00bab09401684b4/compiler/rustc_target/src/spec/abi.rs
 // for possible values here
